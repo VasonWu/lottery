@@ -4,7 +4,7 @@
   "description": "抽奖",
   "main": "index.js",
   "scripts": {
-    "start": "cd dist && node ../../server/index.js 8888",
+    "start": "cd dist && node ../../server/index.js 8887",
     "serve": "npm run start",
     "build": "webpack --mode=production --progress --colors",
     "dev": "webpack-dev-server --config webpack.dev.js --mode=development --progress --colors"
@@ -23,7 +23,7 @@
     "css-loader": "^0.28.10",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.0.4",
-    "node-sass": "^4.7.2",
+    "node-sass": "4.14.1",
     "postcss-loader": "^2.1.1",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.2",

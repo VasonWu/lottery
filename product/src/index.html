@@ -23,7 +23,9 @@
 
     <div class="music">
       <audio id="music" src="./data/music.mp3" class="music-item" loop></audio>
-      <div id="musicBox" class="music-box" title="播放/暂停背景音乐">Music</div>
+      <!-- <div class="logo"></div> -->
+      <img src="./img/logo.png" class="logo"/>
+      <!-- <div id="musicBox" class="music-box" title="播放/暂停背景音乐">Music</div> -->
     </div>
 
     <div id="prizeBar"></div>
@@ -31,12 +33,15 @@
     <div id="container"></div>
 
     <div id="menu">
-      <button id="enter">进入抽奖</button>
+      <button id="enter">Enter</button>
       <div id="lotteryBar" class="none">
-        <button id="lottery">抽奖</button>
-        <button id="reLottery">重新抽奖</button>
-        <button id="save">导出抽奖结果</button>
-        <button id="reset" class="margin-l-40">重置</button>
+        <button id="lottery">Start</button>
+        <button id="next" class="hidden">Next Round</button>        
+        <div class="secondary">
+          <!-- <button id="reLottery">Restart</button> -->
+          <button id="save">Result</button>
+          <button id="reset" class="margin-l-40">Reset</button>  
+        </div>        
       </div>
     </div>
 

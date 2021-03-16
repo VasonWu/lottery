@@ -73,8 +73,10 @@ function initAll() {
       TOTAL_CARDS = ROW_COUNT * COLUMN_COUNT;
 
       // 读取当前已设置的抽奖结果
-      basicData.leftUsers = data.leftUsers;
+      basicData.leftUsers = data.leftUsers;      
       basicData.luckyUsers = data.luckyData;
+      console.log('basicData.leftUsers=' + basicData.leftUsers)
+      console.log('basicData.luckyUsers=' + basicData.luckyUsers)
 
       let prizeIndex = basicData.prizes.length - 1;
       for (; prizeIndex > -1; prizeIndex--) {
@@ -106,7 +108,7 @@ function initAll() {
       animate();
       shineCard();
     }
-  });
+  });  
 }
 
 function initCards() {
@@ -202,7 +204,14 @@ function setLotteryStatus(status = false) {
  * 事件绑定
  */
 function bindEvent() {
-  document.querySelector("#menu").addEventListener("click", function(e) {
+  // document.οnkeypress = function (e) {
+  //   console.log(e)
+  //   // if (e.keyCode == 13) {
+  //   //   document.querySelector("#lottery").click();
+  //   // }
+  // }
+
+  document.querySelector("#menu").addEventListener("click", function (e) {
     e.stopPropagation();
     // 如果正在抽奖，则禁止一切操作
     if (isLotting) {
@@ -224,6 +233,7 @@ function bindEvent() {
         // rotate = !rotate;
         rotate = true;
         switchScreen("lottery");
+        document.querySelector("#lottery").focus();
         break;
       // 重置
       case "reset":
@@ -249,9 +259,10 @@ function bindEvent() {
         break;
       // 抽奖
       case "lottery":
+        // return
         setLotteryStatus(true);
         // 每次抽奖前先保存上一次的抽奖数据
-        saveData();
+        // saveData();
         //更新剩余抽奖数目的数据显示
         changePrize();
         resetCard().then(res => {
@@ -259,7 +270,11 @@ function bindEvent() {
           lottery();
         });
         addQipao(`正在抽取[${currentPrize.title}],调整好姿势`);
-        break;
+        break;  
+      // 下一轮抽奖。直接刷新页面
+      case "next":
+        location.reload();
+        break
       // 重新抽奖
       case "reLottery":
         if (currentLuckys.length === 0) {
@@ -278,14 +293,14 @@ function bindEvent() {
         break;
       // 导出抽奖结果
       case "save":
-        saveData().then(res => {
+        // saveData().then(res => {
           resetCard().then(res => {
             // 将之前的记录置空
             currentLuckys = [];
           });
           exportData();
           addQipao(`数据已保存到EXCEL中。`);
-        });
+        // });
         break;
     }
   });
@@ -299,11 +314,13 @@ function switchScreen(type) {
       btns.enter.classList.remove("none");
       btns.lotteryBar.classList.add("none");
       transform(targets.table, 2000);
+      document.querySelector("#enter").focus();
       break;
     default:
       btns.enter.classList.add("none");
       btns.lotteryBar.classList.remove("none");
       transform(targets.sphere, 2000);
+      document.querySelector("#lottery").focus();
       break;
   }
 }
@@ -340,7 +357,7 @@ function createCard(user, isBold, id, showTable) {
 
   element.appendChild(createElement("name", user[1]));
 
-  element.appendChild(createElement("details", user[0] + "<br/>" + user[2]));
+  element.appendChild(createElement("details", "<br/>" + user[2]));
   return element;
 }
 
@@ -593,7 +610,9 @@ function lottery() {
     selectedCardIndex = [];
     // 当前同时抽取的数目,当前奖品抽完还可以继续抽，但是不记录数据
     let perCount = EACH_COUNT[currentPrizeIndex],
-      leftCount = basicData.leftUsers.length;
+      luckyData = basicData.luckyUsers[currentPrize.type],
+      leftCount = basicData.leftUsers.length,
+      leftPrizeCount = currentPrize.count - (luckyData ? luckyData.length : 0);
 
     if (leftCount === 0) {
       addQipao("人员已抽完，现在重新设置所有人员可以进行二次抽奖！");
@@ -605,16 +624,26 @@ function lottery() {
       let luckyId = random(leftCount);
       currentLuckys.push(basicData.leftUsers.splice(luckyId, 1)[0]);
       leftCount--;
+      leftPrizeCount--;
 
       let cardIndex = random(TOTAL_CARDS);
       while (selectedCardIndex.includes(cardIndex)) {
         cardIndex = random(TOTAL_CARDS);
       }
       selectedCardIndex.push(cardIndex);
+
+      if (leftPrizeCount === 0) {
+        break;
+      }
     }
 
-    // console.log(currentLuckys);
     selectCard();
+    saveData();
+    if(leftPrizeCount === 0) {      
+      document.querySelector("#lottery").classList.add("hidden");
+      document.querySelector("#next").classList.remove("hidden");
+      document.querySelector("#next").focus();
+    }
   });
 }
 
@@ -672,7 +701,7 @@ function changeCard(cardIndex, user) {
 
   card.innerHTML = `<div class="company">${COMPANY}</div><div class="name">${
     user[1]
-  }</div><div class="details">${user[0]}<br/>${user[2] || "PSST"}</div>`;
+  }</div><div class="details">${user[2] || ""}</div>`;
 }
 
 /**
@@ -787,7 +816,7 @@ function createHighlight() {
 
 let onload = window.onload;
 
-window.onload = function() {
+window.onload = function () {
   onload && onload();
 
   let music = document.querySelector("#music");
@@ -797,39 +826,39 @@ window.onload = function() {
     musicBox = document.querySelector("#musicBox");
 
   function animate() {
-    requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
       if (stopAnimate) {
         return;
       }
       rotated = rotated % 360;
-      musicBox.style.transform = "rotate(" + rotated + "deg)";
+      // musicBox.style.transform = "rotate(" + rotated + "deg)";
       rotated += 1;
       animate();
     });
   }
 
-  musicBox.addEventListener(
-    "click",
-    function(e) {
-      if (music.paused) {
-        music.play().then(
-          () => {
-            stopAnimate = false;
-            animate();
-          },
-          () => {
-            addQipao("背景音乐自动播放失败，请手动播放！");
-          }
-        );
-      } else {
-        music.pause();
-        stopAnimate = true;
-      }
-    },
-    false
-  );
+  // musicBox.addEventListener(
+  //   "click",
+  //   function (e) {
+  //     if (music.paused) {
+  //       music.play().then(
+  //         () => {
+  //           stopAnimate = false;
+  //           animate();
+  //         },
+  //         () => {
+  //           addQipao("背景音乐自动播放失败，请手动播放！");
+  //         }
+  //       );
+  //     } else {
+  //       music.pause();
+  //       stopAnimate = true;
+  //     }
+  //   },
+  //   false
+  // );
 
-  setTimeout(function() {
-    musicBox.click();
-  }, 1000);
+  // setTimeout(function () {
+  //   musicBox.click();
+  // }, 1000);
 };
